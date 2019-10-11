@@ -1,11 +1,33 @@
 package workers
 
 import (
+	"crypto/md5"
 	"fmt"
+	"net"
+	"strings"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
 )
+
+var thisMac string
+
+func init() {
+	// 获取本机的MAC地址
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		panic("Error : " + err.Error())
+	}
+	for _, inter := range interfaces {
+		if strings.HasPrefix(inter.Name, "en") {
+			h2 := md5.New()
+			h2.Write([]byte(inter.HardwareAddr.String()))
+			thisMac = fmt.Sprintf("%x", h2.Sum(nil))[:16]
+			break
+		}
+	}
+	fmt.Println(thisMac)
+}
 
 type Fetcher interface {
 	Queue() string
@@ -152,5 +174,5 @@ func (f *fetch) inprogressMessages() []string {
 }
 
 func (f *fetch) inprogressQueue() string {
-	return fmt.Sprint(f.queue, ":", Config.processId, ":inprogress")
+	return fmt.Sprint(f.queue, ":", Config.processId, ":", thisMac, ":inprogress")
 }
