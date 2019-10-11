@@ -31,7 +31,7 @@ func init() {
 	defer resp.Body.Close()
 	content, _ := ioutil.ReadAll(resp.Body)
 	h2 := md5.New()
-	h2.Write([]byte(inter.HardwareAddr.String()))
+	h2.Write([]byte(content))
 	thisIPHash = fmt.Sprintf("%x", h2.Sum(nil))[:16]
 }
 
