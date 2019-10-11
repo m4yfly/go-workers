@@ -3,30 +3,36 @@ package workers
 import (
 	"crypto/md5"
 	"fmt"
-	"net"
-	"strings"
+	"io/ioutil"
+	"net/http"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
 )
 
-var thisMac string
+var thisIPHash string
 
 func init() {
-	// 获取本机的MAC地址
-	interfaces, err := net.Interfaces()
-	if err != nil {
-		panic("Error : " + err.Error())
-	}
-	for _, inter := range interfaces {
-		if strings.HasPrefix(inter.Name, "en") {
-			h2 := md5.New()
-			h2.Write([]byte(inter.HardwareAddr.String()))
-			thisMac = fmt.Sprintf("%x", h2.Sum(nil))[:16]
-			break
-		}
-	}
-	fmt.Println(thisMac)
+	// 获取本机的MAC地址，docker内失效
+	// interfaces, err := net.Interfaces()
+	// if err != nil {
+	// 	panic("Error : " + err.Error())
+	// }
+	// for _, inter := range interfaces {
+	// 	if strings.HasPrefix(inter.Name, "en") {
+	// 		h2 := md5.New()
+	// 		h2.Write([]byte(inter.HardwareAddr.String()))
+	// 		thisMac = fmt.Sprintf("%x", h2.Sum(nil))[:16]
+	// 		break
+	// 	}
+	// }
+	// fmt.Println(thisMac)
+	resp, _ := http.Get("http://ipinfo.io/ip")
+	defer resp.Body.Close()
+	content, _ := ioutil.ReadAll(resp.Body)
+	h2 := md5.New()
+	h2.Write([]byte(inter.HardwareAddr.String()))
+	thisIPHash = fmt.Sprintf("%x", h2.Sum(nil))[:16]
 }
 
 type Fetcher interface {
@@ -174,5 +180,5 @@ func (f *fetch) inprogressMessages() []string {
 }
 
 func (f *fetch) inprogressQueue() string {
-	return fmt.Sprint(f.queue, ":", Config.processId, ":", thisMac, ":inprogress")
+	return fmt.Sprint(f.queue, ":", Config.processId, ":", thisIPHash, ":inprogress")
 }
