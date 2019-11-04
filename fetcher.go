@@ -27,7 +27,10 @@ func init() {
 	// 	}
 	// }
 	// fmt.Println(thisMac)
-	resp, _ := http.Get("http://ipinfo.io/ip")
+	resp, err := http.Get("http://pv.sohu.com/cityjson")
+	if err != nil {
+		return
+	}
 	defer resp.Body.Close()
 	content, _ := ioutil.ReadAll(resp.Body)
 	h2 := md5.New()
