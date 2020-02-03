@@ -1,8 +1,9 @@
 package workers
 
 import (
-	"github.com/bitly/go-simplejson"
 	"reflect"
+
+	"github.com/bitly/go-simplejson"
 )
 
 type data struct {
@@ -29,6 +30,10 @@ func (m *Msg) Args() *Args {
 		d, _ := newData("[]")
 		return &Args{d}
 	}
+}
+
+func (m *Msg) SetNum(key string, val int) {
+	m.Set(key, val)
 }
 
 func (m *Msg) OriginalJson() string {
